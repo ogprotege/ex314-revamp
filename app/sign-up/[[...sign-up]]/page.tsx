@@ -1,28 +1,37 @@
 import { SignUp } from "@clerk/nextjs"
-import { SiteFooter } from "@/components/site-footer"
+import { ChiRho } from "@/components/chi-rho"
+import Link from "next/link"
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex flex-col items-center justify-center">
-          <h1 className="mb-8 text-3xl font-bold text-center">Sign Up</h1>
-          <div className="w-full max-w-md">
-            <SignUp
-              appearance={{
-                elements: {
-                  formButtonPrimary: "bg-purple-600 hover:bg-purple-700",
-                  card: "rounded-lg shadow-md",
-                },
-              }}
-              routing="path"
-              path="/sign-up"
-              signInUrl="/sign-in"
-            />
-          </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="site-header w-full py-6 px-4 md:px-8 flex justify-between items-center">
+        <Link href="/" className="flex items-center gap-2">
+          <ChiRho className="h-8 w-8" />
+          <h1 className="text-2xl font-bold">Ex314.ai</h1>
+        </Link>
+      </header>
+
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <h1 className="text-3xl font-bold text-center mb-8">Sign Up</h1>
+          <SignUp
+            appearance={{
+              elements: {
+                formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
+                card: "rounded-lg shadow-md",
+              },
+            }}
+            routing="path"
+            path="/sign-up"
+            signInUrl="/sign-in"
+          />
         </div>
       </div>
-      <SiteFooter />
+
+      <footer className="bg-gray-100 py-4 px-4 md:px-8 text-center">
+        <div className="text-sm text-gray-500">© 2025 Ex314.ai</div>
+      </footer>
     </div>
   )
 }

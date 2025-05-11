@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SaintOfDay } from "@/components/saint-of-day"
 import { Facebook, Twitter, Instagram, Github, Mail } from "lucide-react"
+import { SignedIn, SignedOut } from "@clerk/nextjs"
 
 export default function Home() {
   return (
@@ -45,15 +46,30 @@ export default function Home() {
             Explore Catholic theology, access resources, and deepen your faith with our AI-powered assistant.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700"
-              onClick={() => {
-                window.location.href = "/login"
-              }}
-            >
-              Try the Chat Interface
-            </Button>
+            <SignedIn>
+              {/* User is signed in */}
+              <Button
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  window.location.href = "/dashboard"
+                }}
+              >
+                Go to Dashboard
+              </Button>
+            </SignedIn>
+            <SignedOut>
+              {/* User is signed out */}
+              <Button
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  window.location.href = "/sign-in"
+                }}
+              >
+                Try the Chat Interface
+              </Button>
+            </SignedOut>
             <Button size="lg" variant="outline" asChild>
               <Link href="/about">Learn More</Link>
             </Button>
@@ -188,3 +204,4 @@ export default function Home() {
     </main>
   )
 }
+

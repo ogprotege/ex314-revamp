@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { authMiddleware } from "@clerk/nextjs/server"
 
-export async function middleware(request: NextRequest) {
-  // Get the pathname from the URL
-  const { pathname } = request.nextUrl
-
-  // Create a response object to modify
-  const response = NextResponse.next()
-
+// This function handles your existing CSP headers
+function addSecurityHeaders(request: NextRequest, response: NextResponse) {
   // Base CSP directives
   const cspDirectives = [
     // Default rules - restrict to same origin by default
@@ -20,13 +16,13 @@ export async function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
 
     // Connections - your site and Turnstile verification
-    "connect-src 'self' https://challenges.cloudflare.com https://*.turnstile.com https://www.google-analytics.com",
+    "connect-src 'self' https://challenges.cloudflare.com https://*.turnstile.com https://www.google-analytics.com https://*.clerk.accounts.dev https://clerk.ex314.ai",
 
     // Frames - your site and Turnstile widget
-    "frame-src 'self' https://challenges.cloudflare.com",
+    "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://clerk.ex314.ai",
 
     // Images - your site, data URLs, and Turnstile
-    "img-src 'self' data: blob: https://challenges.cloudflare.com https://images.unsplash.com",
+    "img-src 'self' data: blob: https://challenges.cloudflare.com https://images.unsplash.com https://*.clerk.accounts.dev https://clerk.ex314.ai",
 
     // Fonts - your site and inline data
     "font-src 'self' data:",
@@ -41,10 +37,27 @@ export async function middleware(request: NextRequest) {
   return response
 }
 
+// Combine Clerk auth middleware with your security headers
+export default authMiddleware({
+  // Your Clerk configuration options here
+  publicRoutes: ["/", "/prayers", "/calendar", "/rosary", "/about", "/resources", "/contact", "/privacy", "/terms"],
+
+  // This function runs after Clerk's auth checks
+  afterAuth(auth, req, evt) {
+    // Get the response from Clerk's middleware
+    const response = NextResponse.next()
+
+    // Add your security headers
+    return addSecurityHeaders(req, response)
+  },
+})
+
 // Configure which routes the middleware applies to
 export const config = {
   matcher: [
-    // Apply to all routes
-    "/(.*)",
+    // Skip Next.js internals and all static files
+    "/((?!_next|[^?]*\\.(html?|css|js|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)",
   ],
 }

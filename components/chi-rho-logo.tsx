@@ -1,14 +1,18 @@
-import Image from "next/image"
-
-interface ChiRhoLogoProps {
-  className?: string
-  size?: number
-}
-
-export function ChiRhoLogo({ className = "", size = 32 }: ChiRhoLogoProps) {
+export function ChiRhoLogo({ className }: { className?: string }) {
   return (
-    <div className={`relative ${className}`} style={{ width: size, height: size }}>
-      <Image src="/chi-ro.png" alt="Chi-Rho" width={size} height={size} className="object-contain" priority />
-    </div>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M16 18l-4.2-10.5" />
+      <path d="M8 18l4.2-10.5" />
+      <circle cx="12" cy="17" r="5" />
+    </svg>
   )
 }

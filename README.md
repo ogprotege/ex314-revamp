@@ -38,46 +38,9 @@ Ex314.ai is a web application that provides a Catholic theological AI assistant,
 
 Ex314.ai is committed to user privacy:
 
-- No third-party analytics or tracking
 - Self-hosted analytics solution with minimal data collection
 - No personal data shared with external services
 - Transparent data usage policies
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18.x or higher
-- npm or yarn
-- Supabase account
-
-### Installation
-
-1. Clone the repository:
-   \`\`\`
-   git clone https://github.com/yourusername/ex314-ai.git
-   cd ex314-ai
-   \`\`\`
-
-2. Install dependencies:
-   \`\`\`
-   npm install
-   \`\`\`
-
-3. Set up environment variables:
-   Create a `.env.local` file with the following variables:
-   \`\`\`
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-   \`\`\`
-
-4. Run the development server:
-   \`\`\`
-   npm run dev
-   \`\`\`
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Deployment
 

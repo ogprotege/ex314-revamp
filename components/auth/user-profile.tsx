@@ -2,10 +2,10 @@
 
 import { useAuth } from "@/hooks/use-auth"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogoutButton } from "./logout-button"
+import { Button } from "@/components/ui/button"
 
 export const UserProfile = () => {
-  const { user, isLoading } = useAuth()
+  const { user, logout, isLoading } = useAuth()
 
   if (isLoading || !user) {
     return null
@@ -26,7 +26,9 @@ export const UserProfile = () => {
             .join("") || "U"}
         </AvatarFallback>
       </Avatar>
-      <LogoutButton />
+      <Button onClick={logout} variant="outline">
+        Log Out
+      </Button>
     </div>
   )
 }

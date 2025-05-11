@@ -1,4 +1,4 @@
-"use client"
+k"use client"
 
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
@@ -25,3 +25,4 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   return isAuthenticated ? <>{children}</> : null
 }
+

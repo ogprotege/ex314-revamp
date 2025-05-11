@@ -7,7 +7,7 @@ import { LoginButton } from "./login-button"
 import { UserProfile } from "./user-profile"
 import { useAuth } from "@/hooks/use-auth"
 
-export function Auth0Navbar() {
+export function SimpleAuthNavbar() {
   const { isAuthenticated, isLoading } = useAuth()
 
   return (

@@ -1,50 +1,12 @@
 "use client"
 
-import { useAuth0 } from "@auth0/auth0-react"
-import { useRouter } from "next/navigation"
+import { useContext } from "react"
+import { AuthContext } from "@/context/AuthContext"
 
 export const useAuth = () => {
-  const {
-    isAuthenticated,
-    isLoading,
-    loginWithRedirect,
-    logout: auth0Logout,
-    user,
-    getAccessTokenSilently,
-  } = useAuth0()
-  const router = useRouter()
-
-  const login = (returnTo?: string) => {
-    loginWithRedirect({
-      appState: {
-        returnTo: returnTo || window.location.pathname,
-      },
-    })
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider")
   }
-
-  const logout = () => {
-    auth0Logout({
-      logoutParams: {
-        returnTo: window.location.origin,
-      },
-    })
-  }
-
-  const getToken = async () => {
-    try {
-      return await getAccessTokenSilently()
-    } catch (error) {
-      console.error("Error getting token:", error)
-      return null
-    }
-  }
-
-  return {
-    isAuthenticated,
-    isLoading,
-    user,
-    login,
-    logout,
-    getToken,
-  }
+  return context
 }

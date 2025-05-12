@@ -65,9 +65,52 @@ export function ChatView({ messages, isLoading, onSendMessage }: ChatViewProps) 
 
     // Reset search when filters change
     if (isSearchOpen && searchTerm) {
-      performSearch(searchTerm, filtered)
+      // We need to manually perform search here to avoid dependency issues
+      const results: number[] = []
+      const lowerTerm = searchTerm.toLowerCase()
+
+      filtered.forEach((message, index) => {
+        if (message.content.toLowerCase().includes(lowerTerm)) {
+          results.push(index)
+        }
+      })
+
+      setSearchResults(results)
+      setCurrentResultIndex(results.length > 0 ? 0 : -1)
+
+      // Scroll to first result if available
+      setTimeout(() => {
+        if (results.length > 0) {
+          const messageIndex = results[0]
+          const messageElement = document.getElementById(`message-${messageIndex}`)
+          messageElement?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }
+      }, 100)
     }
-  }, [filter, messages, isSearchOpen, searchTerm, performSearch])
+  }, [filter, messages, isSearchOpen, searchTerm])
+
+  // Scroll to a specific search result
+  const scrollToResult = useCallback((resultIndex: number) => {
+    const messageIndex = searchResults[resultIndex]
+    const messageElement = document.getElementById(`message-${messageIndex}`)
+
+    if (messageElement && messagesContainerRef.current) {
+      const containerRect = messagesContainerRef.current.getBoundingClientRect()
+      const messageRect = messageElement.getBoundingClientRect()
+
+      const isInView = messageRect.top >= containerRect.top && messageRect.bottom <= containerRect.bottom
+
+      if (!isInView) {
+        messageElement.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+
+      // Highlight the message
+      messageElement.classList.add("highlight-search")
+      setTimeout(() => {
+        messageElement.classList.remove("highlight-search")
+      }, 1500)
+    }
+  }, [searchResults, messagesContainerRef])
 
   // Perform search on filtered messages
   const performSearch = useCallback((term: string, messagesToSearch = filteredMessages) => {
@@ -100,11 +143,10 @@ export function ChatView({ messages, isLoading, onSendMessage }: ChatViewProps) 
     // Scroll to first result
     setTimeout(() => {
       if (results.length > 0) {
-  }, [filteredMessages])
         scrollToResult(0)
       }
     }, 100)
-  }
+  }, [filteredMessages, scrollToResult])
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,182 +177,129 @@ export function ChatView({ messages, isLoading, onSendMessage }: ChatViewProps) 
     trackChatFeature("search_navigation", { direction: "previous" })
   }
 
-  // Scroll to a specific search result
-  const scrollToResult = (resultIndex: number) => {
-    const messageIndex = searchResults[resultIndex]
-    const messageElement = document.getElementById(`message-${messageIndex}`)
-
-    if (messageElement && messagesContainerRef.current) {
-      const containerRect = messagesContainerRef.current.getBoundingClientRect()
-      const messageRect = messageElement.getBoundingClientRect()
-
-      const isInView = messageRect.top >= containerRect.top && messageRect.bottom <= containerRect.bottom
-
-      if (!isInView) {
-        messageElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        })
-      }
-    }
+  // Close search
+  const closeSearch = () => {
+    setIsSearchOpen(false)
+    setSearchTerm("")
+    setSearchResults([])
   }
 
-  // Toggle search
-  const toggleSearch = () => {
-    const newState = !isSearchOpen
-    setIsSearchOpen(newState)
-
-    if (!newState) {
-      setSearchTerm("")
-      setSearchResults([])
-    } else {
-      trackChatFeature("open_search", {})
-    }
-  }
-
-  // Toggle filter
+  // Toggle filter panel
   const toggleFilter = () => {
-    const newState = !isFilterOpen
-    setIsFilterOpen(newState)
-
-    if (newState) {
-      trackChatFeature("open_filter", {})
+    setIsFilterOpen(!isFilterOpen)
+    if (isFilterOpen) {
+      trackChatFeature("filter_close")
+    } else {
+      trackChatFeature("filter_open")
     }
-  }
-
-  // Handle filter changes
-  const handleFilterChange = (newFilter: MessageFilter) => {
-    setFilter(newFilter)
-  }
-
-  // Check if any filters are active
-  const isFilterActive = () => {
-    return filter.type !== "all" || filter.preset !== "all"
   }
 
   return (
-    <div className="flex-grow flex flex-col h-full overflow-hidden relative">
-      <div className="flex justify-between items-center p-2 border-b border-[#333] gap-2">
-        <div className="flex-1">
-          <ExportButton />
-        </div>
-        <div className="flex items-center gap-2">
-          <ShortcutHelp />
-          <button
-            onClick={toggleSearch}
-            className="p-1.5 rounded-md text-gray-custom hover:text-white hover:bg-[#333] transition-colors"
-            aria-label="Search messages"
-            data-search-button
-          >
-            <Search size={18} />
-          </button>
-          <div className="relative">
-            <button
-              onClick={toggleFilter}
-              className={`p-1.5 rounded-md transition-colors ${
-                isFilterActive() ? "text-white bg-accent-purple" : "text-gray-custom hover:text-white hover:bg-[#333]"
-              }`}
-              aria-label="Filter messages"
-            >
-              <Filter size={18} />
-            </button>
-            {isFilterOpen && (
-              <ChatFilter
-                isOpen={isFilterOpen}
-                onClose={() => setIsFilterOpen(false)}
-                onFilterChange={handleFilterChange}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-
-      {isSearchOpen && (
-        <div className="absolute top-12 left-0 right-0 z-10 bg-card-bg border-b border-[#444] p-2 flex items-center gap-2">
-          <div className="relative flex-grow">
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-dark-bg">
+      {/* Header with search and filter */}
+      <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-dark-card-bg border-b dark:border-gray-800">
+        {isSearchOpen ? (
+          <div className="flex items-center flex-grow gap-2">
             <input
               type="text"
               value={searchTerm}
               onChange={handleSearchChange}
               placeholder="Search in conversation..."
-              className="w-full p-2 pl-8 bg-input-bg border border-[#444] rounded text-sm text-white placeholder:text-gray-custom"
+              className="flex-grow p-1 text-sm border rounded dark:bg-dark-input-bg dark:border-gray-700 dark:text-white"
               autoFocus
             />
-            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-custom" size={16} />
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={goToPrevResult}
-              disabled={searchResults.length === 0}
-              className="p-1.5 rounded-md text-gray-custom hover:text-white hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Previous result"
-            >
-              <ArrowUp size={16} />
-            </button>
-            <button
-              onClick={goToNextResult}
-              disabled={searchResults.length === 0}
-              className="p-1.5 rounded-md text-gray-custom hover:text-white hover:bg-[#333] disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Next result"
-            >
-              <ArrowDown size={16} />
-            </button>
-            <span className="text-xs text-gray-custom min-w-[60px] text-center">
-              {searchResults.length > 0
-                ? `${currentResultIndex + 1} of ${searchResults.length}`
-                : searchTerm
-                  ? "No results"
-                  : ""}
-            </span>
-            <button
-              onClick={toggleSearch}
-              className="p-1.5 rounded-md text-gray-custom hover:text-white hover:bg-[#333]"
-              aria-label="Close search"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div
-        className="flex-grow overflow-y-auto p-4 custom-scrollbar"
-        ref={messagesContainerRef}
-        style={{ paddingTop: isSearchOpen ? "60px" : "16px" }}
-      >
-        {filteredMessages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center p-4 bg-card-bg rounded-lg border border-[#444] max-w-md">
-              <Filter className="mx-auto mb-2 text-gray-custom" size={24} />
-              <h3 className="text-lg font-medium text-white mb-1">No messages match your filters</h3>
-              <p className="text-sm text-gray-custom">Try adjusting your filter settings to see more messages.</p>
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-gray-500 dark:text-gray-400 min-w-[60px]">
+                {searchResults.length > 0
+                  ? `${currentResultIndex + 1}/${searchResults.length}`
+                  : "No results"}
+              </span>
               <button
-                onClick={() => {
-                  setFilter({ type: "all", preset: "all" })
-                  trackChatFeature("reset_filters", {})
-                }}
-                className="mt-3 px-4 py-2 bg-accent-purple text-white text-sm rounded-md"
+                onClick={goToPrevResult}
+                disabled={searchResults.length === 0}
+                className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-400 dark:hover:text-white"
+                title="Previous result"
               >
-                Reset Filters
+                <ArrowUp size={16} />
+              </button>
+              <button
+                onClick={goToNextResult}
+                disabled={searchResults.length === 0}
+                className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-400 dark:hover:text-white"
+                title="Next result"
+              >
+                <ArrowDown size={16} />
+              </button>
+              <button
+                onClick={closeSearch}
+                className="p-1 ml-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                title="Close search"
+              >
+                <X size={16} />
               </button>
             </div>
           </div>
         ) : (
-          filteredMessages.map((message, index) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              id={`message-${index}`}
-              searchTerm={isSearchOpen ? searchTerm : ""}
-              isHighlighted={searchResults.indexOf(index) === currentResultIndex}
-            />
-          ))
+          <>
+            <h2 className="text-lg font-semibold dark:text-white">Chat</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setIsSearchOpen(true)
+                  trackChatFeature("search_open")
+                }}
+                className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                title="Search messages"
+              >
+                <Search size={18} />
+              </button>
+              <button
+                onClick={toggleFilter}
+                className={`p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white ${
+                  isFilterOpen ? "bg-gray-200 dark:bg-gray-700 rounded" : ""
+                }`}
+                title="Filter messages"
+              >
+                <Filter size={18} />
+              </button>
+              <ExportButton messages={messages} />
+              <ShortcutHelp />
+            </div>
+          </>
         )}
+      </div>
+
+      {/* Filter panel */}
+      {isFilterOpen && (
+        <ChatFilter
+          filter={filter}
+          onFilterChange={(newFilter) => {
+            setFilter(newFilter)
+            trackChatFeature("filter_change", { filter: JSON.stringify(newFilter) })
+          }}
+        />
+      )}
+
+      {/* Chat messages */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-grow overflow-y-auto p-4 space-y-4 custom-scrollbar"
+      >
+        {filteredMessages.map((message, index) => (
+          <ChatMessage
+            key={index}
+            message={message}
+            id={`message-${index}`}
+            highlight={searchResults.includes(index) && searchTerm !== ""}
+            isHighlighted={index === searchResults[currentResultIndex] && searchResults.length > 0}
+            searchTerm={searchTerm}
+          />
+        ))}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 border-t border-[#333]">
+      {/* Input area */}
+      <div className="p-4 bg-white dark:bg-dark-card-bg border-t dark:border-gray-800">
         <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} />
       </div>
     </div>

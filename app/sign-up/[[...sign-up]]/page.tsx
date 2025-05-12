@@ -1,8 +1,137 @@
-import { SignUp } from "@clerk/nextjs"
-import { ChiRho } from "@/components/chi-rho"
-import Link from "next/link"
+"use client"
 
-export default function SignUpPage() {
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { ChiRho } from "@/components/chi-rho"
+import { Button } from "@/components/ui/button"
+
+// Create a fallback mechanism if Clerk is not available
+let clerkImported = false
+let SignUp: any = null
+
+try {
+  // Try to import Clerk
+  const clerk = require("@clerk/nextjs")
+  SignUp = clerk.SignUp
+  clerkImported = true
+} catch (e) {
+  console.warn("Clerk auth not available, using fallback sign up")
+  clerkImported = false
+}
+
+// Fallback sign-up component
+function FallbackSignUp() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
+  const [error, setError] = useState("")
+  const router = useRouter()
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!email || !password || !name) {
+      setError("Please fill out all fields")
+      return
+    }
+
+    // Simple fallback registration
+    const user = {
+      email,
+      name,
+      picture: null,
+    }
+
+    localStorage.setItem("user", JSON.stringify(user))
+    router.push("/")
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <ChiRho className="h-12 w-12 mx-auto" />
+          <h2 className="mt-6 text-3xl font-bold">Create a new account</h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Or{" "}
+            <Link href="/sign-in" className="font-medium text-blue-600 hover:text-blue-500">
+              sign in to your existing account
+            </Link>
+          </p>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Full name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="email-address" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+              Create account
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// Clerk SignUp component
+function ClerkSignUp() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <header className="site-header w-full py-6 px-4 md:px-8 flex justify-between items-center">
@@ -34,4 +163,12 @@ export default function SignUpPage() {
       </footer>
     </div>
   )
+}
+
+export default function SignUpPage() {
+  if (clerkImported) {
+    return <ClerkSignUp />
+  } else {
+    return <FallbackSignUp />
+  }
 }

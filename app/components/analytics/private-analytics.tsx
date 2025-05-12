@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 
 export function PrivateAnalytics() {
@@ -11,59 +11,19 @@ export function PrivateAnalytics() {
   const lastPageViewId = useRef<string | null>(null)
   const pageEnterTime = useRef<number>(0)
 
-  // Initialize analytics
-  useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
+  // Track page view
+  const trackPageView = useCallback(async () => {
+    try {
+      // Create query params object
+      const queryParamsObj = {}
+      if (searchParams) {
+        searchParams.forEach((value, key) => {
+          queryParamsObj[key] = value
+        })
+      }
 
-    // Generate or retrieve session ID
-    let existingSessionId = localStorage.getItem("ex314_session_id")
-    const sessionExpiry = localStorage.getItem("ex314_session_expiry")
-    const hasVisitedBefore = localStorage.getItem("ex314_has_visited")
-
-    // Check if session is expired (30 min idle)
-    if (sessionExpiry && Number.parseInt(sessionExpiry) < Date.now()) {
-      existingSessionId = null
-    }
-
-    if (!existingSessionId) {
-      // Create new session ID
-      existingSessionId = crypto.randomUUID()
-      localStorage.setItem("ex314_session_id", existingSessionId)
-    }
-
-    sessionId.current = existingSessionId
-
-    // Update session expiry (30 min from now)
-    localStorage.setItem("ex314_session_expiry", (Date.now() + 30 * 60 * 1000).toString())
-
-    // Mark as returning visitor if they've been here before
-    if (!hasVisitedBefore) {
-      localStorage.setItem("ex314_has_visited", "true")
-    }
-
-    // Initialize session
-    initSession(!!hasVisitedBefore)
-
-    // Track when user leaves the site
-    window.addEventListener("beforeunload", handlePageExit)
-
-    return () => {
-      window.removeEventListener("beforeunload", handlePageExit)
-    }
-  }, [])
-
-  // Track page views
-  useEffect(() => {
-    // Don't track initial page load - that's handled in initSession
-    if (!initialized.current || !sessionId.current) return
-
-    // If there was a previous page view, record time spent on that page
-    if (lastPageViewId.current && pageEnterTime.current > 0) {
-      const timeOnPage = Math.round((performance.now() - pageEnterTime.current) / 1000)
-
-      // Update previous page view with time spent
-      fetch("/api/analytics/beacon", {
+      // Use the beacon API
+      const response = await fetch("/api/analytics/beacon", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,28 +31,34 @@ export function PrivateAnalytics() {
         body: JSON.stringify({
           table: "page_views",
           payload: {
-            id: lastPageViewId.current,
-            time_on_page: timeOnPage,
-            exit_page: false,
+            session_id: sessionId.current,
+            page_path: pathname || "/",
+            page_title: document.title,
+            timestamp: new Date().toISOString(),
+            referrer_page: document.referrer,
+            query_params: Object.keys(queryParamsObj).length > 0 ? queryParamsObj : null,
           },
         }),
-      }).catch((error) => {
-        console.error("Failed to update page time:", error)
       })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        console.warn("Page view tracking notice:", result)
+      } else {
+        // Store the ID for later updating
+        if (result.id) {
+          lastPageViewId.current = result.id
+        }
+        console.debug("Successfully tracked page view")
+      }
+    } catch (error) {
+      console.error("Failed to track page view:", error)
     }
-
-    // Track new page view
-    trackPageView()
-
-    // Reset page enter time
-    pageEnterTime.current = performance.now()
-
-    // Update session expiry
-    localStorage.setItem("ex314_session_expiry", (Date.now() + 30 * 60 * 1000).toString())
   }, [pathname, searchParams])
 
   // Initialize session
-  const initSession = async (isReturning: boolean) => {
+  const initSession = useCallback(async (isReturning: boolean) => {
     try {
       // Get visitor IP and location info
       let visitorInfo = {
@@ -141,56 +107,10 @@ export function PrivateAnalytics() {
     } catch (error) {
       console.error("Failed to initialize analytics session:", error)
     }
-  }
-
-  // Track page view
-  const trackPageView = async () => {
-    try {
-      // Create query params object
-      const queryParamsObj = {}
-      if (searchParams) {
-        searchParams.forEach((value, key) => {
-          queryParamsObj[key] = value
-        })
-      }
-
-      // Use the beacon API
-      const response = await fetch("/api/analytics/beacon", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          table: "page_views",
-          payload: {
-            session_id: sessionId.current,
-            page_path: pathname || "/",
-            page_title: document.title,
-            timestamp: new Date().toISOString(),
-            referrer_page: document.referrer,
-            query_params: Object.keys(queryParamsObj).length > 0 ? queryParamsObj : null,
-          },
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        console.warn("Page view tracking notice:", result)
-      } else {
-        // Store the ID for later updating
-        if (result.id) {
-          lastPageViewId.current = result.id
-        }
-        console.debug("Successfully tracked page view")
-      }
-    } catch (error) {
-      console.error("Failed to track page view:", error)
-    }
-  }
+  }, [pathname, trackPageView])
 
   // Handle page exit
-  const handlePageExit = () => {
+  const handlePageExit = useCallback(() => {
     // Update time on page
     if (lastPageViewId.current && pageEnterTime.current > 0) {
       const timeOnPage = Math.round((performance.now() - pageEnterTime.current) / 1000)
@@ -208,7 +128,87 @@ export function PrivateAnalytics() {
         }),
       )
     }
-  }
+  }, [])
+
+  // Initialize analytics
+  useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
+
+    // Generate or retrieve session ID
+    let existingSessionId = localStorage.getItem("ex314_session_id")
+    const sessionExpiry = localStorage.getItem("ex314_session_expiry")
+    const hasVisitedBefore = localStorage.getItem("ex314_has_visited")
+
+    // Check if session is expired (30 min idle)
+    if (sessionExpiry && Number.parseInt(sessionExpiry) < Date.now()) {
+      existingSessionId = null
+    }
+
+    if (!existingSessionId) {
+      // Create new session ID
+      existingSessionId = crypto.randomUUID()
+      localStorage.setItem("ex314_session_id", existingSessionId)
+    }
+
+    sessionId.current = existingSessionId
+
+    // Update session expiry (30 min from now)
+    localStorage.setItem("ex314_session_expiry", (Date.now() + 30 * 60 * 1000).toString())
+
+    // Mark as returning visitor if they've been here before
+    if (!hasVisitedBefore) {
+      localStorage.setItem("ex314_has_visited", "true")
+    }
+
+    // Initialize session
+    initSession(!!hasVisitedBefore)
+
+    // Track when user leaves the site
+    window.addEventListener("beforeunload", handlePageExit)
+
+    return () => {
+      window.removeEventListener("beforeunload", handlePageExit)
+    }
+  }, [initSession, handlePageExit])
+
+  // Track page views
+  useEffect(() => {
+    // Don't track initial page load - that's handled in initSession
+    if (!initialized.current || !sessionId.current) return
+
+    // If there was a previous page view, record time spent on that page
+    if (lastPageViewId.current && pageEnterTime.current > 0) {
+      const timeOnPage = Math.round((performance.now() - pageEnterTime.current) / 1000)
+
+      // Update previous page view with time spent
+      fetch("/api/analytics/beacon", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          table: "page_views",
+          payload: {
+            id: lastPageViewId.current,
+            time_on_page: timeOnPage,
+            exit_page: false,
+          },
+        }),
+      }).catch((error) => {
+        console.error("Failed to update page time:", error)
+      })
+    }
+
+    // Track new page view
+    trackPageView()
+
+    // Reset page enter time
+    pageEnterTime.current = performance.now()
+
+    // Update session expiry
+    localStorage.setItem("ex314_session_expiry", (Date.now() + 30 * 60 * 1000).toString())
+  }, [pathname, searchParams, trackPageView])
 
   return null // This component doesn't render anything
 }

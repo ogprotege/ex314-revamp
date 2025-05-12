@@ -2,8 +2,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { useAuth } from "@/hooks/use-fallback-auth"
 
 export default function EnvironmentDiagnosticsPage() {
+  // Call useAuth to ensure it works in this component
+  useAuth();
   // Clerk Auth Environment Variables
   const clerkVariables = [
     { name: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", value: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, sensitive: false },

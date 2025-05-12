@@ -43,9 +43,9 @@ export default function Home() {
       <section className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12 md:py-24">
         <div className="max-w-3xl mx-auto">
           <ChiRho className="h-24 w-24 mx-auto mb-8 animate-pulse" />
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">Catholic Theological AI Assistant</h1>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">Catholic Theological Platform</h1>
           <p className="text-xl mb-8 text-gray-600 max-w-2xl mx-auto">
-            Explore Catholic theology, access resources, and deepen your faith with our AI-powered assistant.
+            Explore Catholic theology, access resources, and deepen your faith with our specially trained LLM built for the faithful.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (
@@ -127,7 +127,7 @@ export default function Home() {
                 size="icon"
                 onClick={() =>
                   window.open(
-                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent("Check out Ex314.ai - Catholic Theological AI Assistant")}`,
+                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent("Check out Ex314.ai - Catholic Theological Platform")}`,
                     "_blank",
                   )
                 }
@@ -140,7 +140,7 @@ export default function Home() {
                 size="icon"
                 onClick={() =>
                   window.open(
-                    `mailto:?subject=${encodeURIComponent("Ex314.ai - Catholic Theological AI Assistant")}&body=${encodeURIComponent(`Check out Ex314.ai: ${window.location.href}`)}`,
+                    `mailto:?subject=${encodeURIComponent("Ex314.ai - Catholic Theological Platform")}&body=${encodeURIComponent(`Check out Ex314.ai: ${window.location.href}`)}`,
                     "_blank",
                   )
                 }

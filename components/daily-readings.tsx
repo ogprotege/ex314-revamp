@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { format, addDays, subDays } from "date-fns"
 import { ChevronLeft, ChevronRight, BookOpen, Bookmark } from "lucide-react"
 import { getReadingsForDate, type Reading } from "@/lib/daily-readings"
@@ -15,6 +15,12 @@ import {
 export default function DailyReadings({ initialDate = new Date(2025, 4, 12) }: { initialDate?: Date }) {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [activeReading, setActiveReading] = useState<string | null>(null)
+
+  // Update selected date when initialDate changes (when selected from calendar)
+  useEffect(() => {
+    setSelectedDate(initialDate)
+    setActiveReading(null)
+  }, [initialDate])
 
   const readings = getReadingsForDate(selectedDate)
   const season = getCurrentLiturgicalSeason(selectedDate)

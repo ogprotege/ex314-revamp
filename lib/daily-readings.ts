@@ -13,6 +13,54 @@ export type DailyReadings = {
 
 // Sample readings for May 2025
 const readingsData: Record<string, DailyReadings> = {
+  // May 1, 2025 - Thursday, St. Joseph the Worker
+  "2025-05-01": {
+    date: "2025-05-01",
+    liturgicalDay: "Memorial of Saint Joseph the Worker",
+    season: "Easter",
+    readings: [
+      {
+        type: "first",
+        reference: "Acts 13:13-25",
+        text: "From Paphos, Paul and his companions set sail and arrived at Perga in Pamphylia. But John left them and returned to Jerusalem. They continued on from Perga and reached Antioch in Pisidia. On the sabbath day they entered into the synagogue and took their seats.",
+      },
+      {
+        type: "psalm",
+        reference: "Psalm 89:2-3, 21-22, 25, 27",
+        text: "R. For ever I will sing the goodness of the Lord.\nI will sing of your mercy forever, Lord,\nproclaim your faithfulness through all ages.\nFor you have said, \"My kindness is established forever\";\nin heaven you have confirmed your faithfulness.",
+      },
+      {
+        type: "gospel",
+        reference: "John 13:16-20",
+        text: "When Jesus had washed the disciples' feet, he said to them: \"Amen, amen, I say to you, no slave is greater than his master nor any messenger greater than the one who sent him.\"",
+      }
+    ],
+  },
+
+  // May 5, 2025 - Monday of the 5th Week of Easter
+  "2025-05-05": {
+    date: "2025-05-05",
+    liturgicalDay: "Monday of the 5th Week of Easter",
+    season: "Easter",
+    readings: [
+      {
+        type: "first",
+        reference: "Acts 14:5-18",
+        text: "There was an attempt in Iconium by both the Gentiles and the Jews, together with their leaders, to attack and stone Paul and Barnabas. They realized it, and fled to the Lycaonian cities of Lystra and Derbe and to the surrounding countryside.",
+      },
+      {
+        type: "psalm",
+        reference: "Psalm 115:1-2, 3-4, 15-16",
+        text: "R. Not to us, O Lord, but to your name give the glory.\nNot to us, O LORD, not to us\nbut to your name give glory\nbecause of your kindness, because of your truth.\nWhy should the pagans say,\n\"Where is their God?\"",
+      },
+      {
+        type: "gospel",
+        reference: "John 14:21-26",
+        text: "Jesus said to his disciples: \"Whoever has my commandments and observes them is the one who loves me. Whoever loves me will be loved by my Father, and I will love him and reveal myself to him.\"",
+      }
+    ],
+  },
+
   // May 10, 2025 - Saturday of the 5th Week of Easter
   "2025-05-10": {
     date: "2025-05-10",
@@ -197,11 +245,68 @@ R. Alleluia, alleluia.`,
       },
     ],
   },
+  // May 20, 2025 - Tuesday after Pentecost
+  "2025-05-20": {
+    date: "2025-05-20",
+    liturgicalDay: "Tuesday of the 7th Week in Ordinary Time",
+    season: "Ordinary Time",
+    readings: [
+      {
+        type: "first",
+        reference: "Sirach 2:1-11",
+        text: "My child, when you come to serve the Lord, prepare yourself for trials. Be sincere of heart and steadfast, and do not be impetuous in time of adversity.",
+      },
+      {
+        type: "psalm",
+        reference: "Psalm 37:3-4, 18-19, 27-28, 39-40",
+        text: "R. Commit your life to the Lord, and he will help you.\nTrust in the LORD and do good,\nthat you may dwell in the land and be fed in security.\nTake delight in the LORD,\nand he will grant you your heart's requests.",
+      },
+      {
+        type: "gospel",
+        reference: "Mark 9:30-37",
+        text: "Jesus and his disciples left from there and began a journey through Galilee, but he did not wish anyone to know about it. He was teaching his disciples and telling them, \"The Son of Man is to be handed over to men and they will kill him, and three days after his death the Son of Man will rise.\"",
+      }
+    ],
+  },
+
+  // May 25, 2025 - Trinity Sunday
+  "2025-05-25": {
+    date: "2025-05-25",
+    liturgicalDay: "Solemnity of the Most Holy Trinity",
+    season: "Ordinary Time",
+    readings: [
+      {
+        type: "first",
+        reference: "Deuteronomy 4:32-34, 39-40",
+        text: "Moses said to the people: \"Ask now of the days of old, before your time, ever since God created man upon the earth; ask from one end of the sky to the other: Did anything so great ever happen before? Was it ever heard of?\"",
+      },
+      {
+        type: "psalm",
+        reference: "Psalm 33:4-5, 6, 9, 18-19, 20, 22",
+        text: "R. Blessed the people the Lord has chosen to be his own.\nUpright is the word of the LORD,\nand all his works are trustworthy.\nHe loves justice and right;\nof the kindness of the Lord the earth is full.",
+      },
+      {
+        type: "second",
+        reference: "Romans 8:14-17",
+        text: "Brothers and sisters: For those who are led by the Spirit of God are sons of God. For you did not receive a spirit of slavery to fall back into fear, but you received a Spirit of adoption, through whom we cry, \"Abba, Father!\"",
+      },
+      {
+        type: "gospel",
+        reference: "Matthew 28:16-20",
+        text: "The eleven disciples went to Galilee, to the mountain to which Jesus had ordered them. When they all saw him, they worshiped, but they doubted. Then Jesus approached and said to them, \"All power in heaven and on earth has been given to me. Go, therefore, and make disciples of all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Spirit, teaching them to observe all that I have commanded you. And behold, I am with you always, until the end of the age.\"",
+      }
+    ],
+  },
   // Add more days as needed...
 }
 
 export function getReadingsForDate(date: Date): DailyReadings | null {
-  const dateString = date.toISOString().split("T")[0]
+  // Format as YYYY-MM-DD
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Add 1 because months are 0-indexed
+  const day = String(date.getDate()).padStart(2, '0');
+
+  const dateString = `${year}-${month}-${day}`;
   return readingsData[dateString] || null
 }
 

@@ -56,7 +56,7 @@ export default function AboutPage() {
 
               <h2 className="text-2xl font-bold mb-4">What We Offer</h2>
               <p className="text-gray-600 mb-6">
-                Our AI assistant is designed to help users explore Catholic theology, access prayers and devotions, and
+                Our platform is designed to help users explore Catholic theology, access prayers and devotions, and
                 navigate the liturgical calendar. We provide resources from trusted Catholic sources, including Church
                 documents, the Catechism, writings of the saints, and more.
               </p>
@@ -64,13 +64,13 @@ export default function AboutPage() {
               <h2 className="text-2xl font-bold mb-4">Our Approach</h2>
               <p className="text-gray-600 mb-6">
                 We believe that technology can be a powerful tool for evangelization and catechesis when used properly.
-                Our AI assistant is trained on authentic Catholic teachings and is designed to provide accurate
+                Our platform is built on authentic Catholic teachings and is designed to provide accurate
                 information while respecting the complexity and depth of Catholic theology.
               </p>
 
               <h2 className="text-2xl font-bold mb-4">Limitations</h2>
               <p className="text-gray-600 mb-6">
-                While our AI assistant strives to provide accurate information, it is not a substitute for the guidance
+                While our platform strives to provide accurate information, it is not a substitute for the guidance
                 of priests, spiritual directors, or official Church teaching. For matters of personal spiritual
                 direction, moral guidance, or official Church positions, we encourage users to consult with their local
                 clergy or refer to official Church documents.

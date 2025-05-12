@@ -104,18 +104,18 @@ export default function LiturgicalCalendar() {
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center">
-          <div className="font-medium">Su</div>
-          <div className="font-medium">Mo</div>
-          <div className="font-medium">Tu</div>
-          <div className="font-medium">We</div>
-          <div className="font-medium">Th</div>
-          <div className="font-medium">Fr</div>
-          <div className="font-medium">Sa</div>
+        <div className="grid grid-cols-7 gap-1 text-center max-w-md mx-auto">
+          <div className="font-medium text-xs">Su</div>
+          <div className="font-medium text-xs">Mo</div>
+          <div className="font-medium text-xs">Tu</div>
+          <div className="font-medium text-xs">We</div>
+          <div className="font-medium text-xs">Th</div>
+          <div className="font-medium text-xs">Fr</div>
+          <div className="font-medium text-xs">Sa</div>
 
           {/* Empty cells for days before the start of the month */}
           {Array.from({ length: startDay }).map((_, index) => (
-            <div key={`empty-start-${index}`} className="h-10 w-10"></div>
+            <div key={`empty-start-${index}`} className="h-8 w-8"></div>
           ))}
 
           {/* Days of the month */}
@@ -130,21 +130,21 @@ export default function LiturgicalCalendar() {
             return (
               <div
                 key={day.toString()}
-                className={`h-10 w-10 flex items-center justify-center rounded-full
-                  ${isSelected ? "ring-2 ring-offset-2 ring-purple-500" : ""}
+                className={`h-8 w-8 flex items-center justify-center rounded-full text-sm
+                  ${isSelected ? "ring-2 ring-offset-1 ring-purple-500" : ""}
                   ${isToday ? "bg-purple-600 text-white font-bold" : ""}
                   ${!isToday && isCurrentMonth && feast?.type === "solemnity" ? "bg-purple-100 font-medium" : ""}
                   ${!isToday && isCurrentMonth && feast?.type === "feast" ? "bg-red-100 font-medium" : ""}
                   ${!isToday && isCurrentMonth && !feast ? `hover:${seasonColor} hover:bg-opacity-20` : ""}
                   ${!isCurrentMonth ? "text-gray-400" : ""}
-                  transition-colors duration-200 cursor-pointer relative`}
+                  transition-all duration-200 hover:scale-110 cursor-pointer relative`}
                 title={feast?.name || ""}
                 onClick={() => selectDay(day)}
               >
                 {format(day, "d")}
                 {feast && (
                   <span
-                    className={`absolute bottom-0 right-0 w-2 h-2 rounded-full ${
+                    className={`absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full ${
                       feast.color ? getLiturgicalColorClass(feast.color) : "bg-gray-400"
                     }`}
                   ></span>
@@ -155,36 +155,38 @@ export default function LiturgicalCalendar() {
 
           {/* Empty cells for days after the end of the month */}
           {Array.from({ length: endDay }).map((_, index) => (
-            <div key={`empty-end-${index}`} className="h-10 w-10"></div>
+            <div key={`empty-end-${index}`} className="h-8 w-8"></div>
           ))}
         </div>
       </div>
 
       {/* Daily Readings */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Daily Mass Readings</h2>
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-bold mb-4 text-center">Daily Mass Readings</h2>
         <DailyReadings initialDate={selectedDate} />
       </div>
 
-      {/* Upcoming Feasts */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-4">Upcoming Feasts</h2>
-        <ul className="space-y-3">
-          {upcomingFeasts.map((feast, index) => (
-            <li key={index} className="flex justify-between items-center">
-              <span>{feast.name}</span>
-              <span className="text-gray-500">{format(feast.date, "MMM d")}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        {/* Upcoming Feasts */}
+        <div className="bg-white rounded-lg shadow-md p-4 transition-all duration-200 hover:shadow-md hover:border-purple-300 border border-transparent">
+          <h2 className="text-xl font-bold mb-3">Upcoming Feasts</h2>
+          <ul className="space-y-2">
+            {upcomingFeasts.map((feast, index) => (
+              <li key={index} className="flex justify-between items-center text-sm py-1 border-b border-gray-100 last:border-0">
+                <span>{feast.name}</span>
+                <span className="text-gray-500 ml-2">{format(feast.date, "MMM d")}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      {/* Today's Celebration */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-2">Today's Celebration</h2>
-        <p className="text-gray-500 mb-4">{format(currentDate, "MMMM d, yyyy")}</p>
+        {/* Today's Celebration */}
+        <div className="bg-white rounded-lg shadow-md p-4 transition-all duration-200 hover:shadow-md hover:border-purple-300 border border-transparent">
+          <h2 className="text-xl font-bold mb-2">Today's Celebration</h2>
+          <p className="text-gray-500 text-sm mb-3">{format(selectedDate, "MMMM d, yyyy")}</p>
 
-        <TodayCelebration date={currentDate} />
+          <TodayCelebration date={selectedDate} />
+        </div>
       </div>
     </div>
   )

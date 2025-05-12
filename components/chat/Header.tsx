@@ -13,8 +13,8 @@ export const Header = () => {
           </h1>
         </div>
         <p className="text-sm text-gray-custom max-w-2xl leading-relaxed">
-          This is a testing space for our Proof of Concept - a Catholic theological AI assistant built with React and
-          TypeScript. Guided by Exodus 3:14, "I AM WHO I AM," we seek to explore faith through modern technology.
+          This is a testing space for our Proof of Concept - a Catholic theological LLM built specifically for the faith by the faith,
+          powered by React and TypeScript. Guided by Exodus 3:14, "I AM WHO I AM," we seek to explore faith through modern technology.
         </p>
         <a href="mailto:notapharisee@ex314.ai" className="text-xs text-accent-gold hover:underline font-medium">
           notapharisee@ex314.ai

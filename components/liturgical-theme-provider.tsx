@@ -2,11 +2,15 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { getCurrentSeason } from "@/lib/liturgical-calendar"
+import { getCurrentLiturgicalSeason } from "@/lib/liturgical-calendar"
 
-interface LiturgicalThemeContextProps {
-  liturgicalTheme: string
-  setLiturgicalTheme: (theme: string) => void
+interface LiturgicalThemeContextType {
+  isLiturgicalThemeEnabled: boolean
+  toggleLiturgicalTheme: () => void
+  currentLiturgicalColor: string
+  currentSeason: string
+  liturgicalTheme?: string
+  setLiturgicalTheme?: (theme: string) => void
 }
 
 const LiturgicalThemeContext = createContext<LiturgicalThemeContextType>({
@@ -16,12 +20,11 @@ const LiturgicalThemeContext = createContext<LiturgicalThemeContextType>({
   currentSeason: "Ordinary Time",
 })
 
-export const useLiturgicalTheme = () => useContext(LiturgicalThemeContext)
-
 export function LiturgicalThemeProvider({ children }: { children: React.ReactNode }) {
   const [isLiturgicalThemeEnabled, setIsLiturgicalThemeEnabled] = useState(false)
   const [currentLiturgicalColor, setCurrentLiturgicalColor] = useState("white")
   const [currentSeason, setCurrentSeason] = useState("Ordinary Time")
+  const [liturgicalTheme, setLiturgicalTheme] = useState("default")
 
   useEffect(() => {
     // Load preference from localStorage
@@ -32,14 +35,16 @@ export function LiturgicalThemeProvider({ children }: { children: React.ReactNod
 
     // Get current liturgical season and color
     const today = new Date(2025, 4, 9) // May 9, 2025
-    const season = getCurrentSeason(today)
-    setCurrentLiturgicalColor(season.color.toLowerCase())
-    setCurrentSeason(season.name)
+    const season = getCurrentLiturgicalSeason(today)
+    if (season) {
+      setCurrentLiturgicalColor(season.color.toLowerCase())
+      setCurrentSeason(season.name)
+    }
   }, [])
 
   useEffect(() => {
-    const season = getCurrentLiturgicalSeason()
-    switch (season) {
+    // Update liturgical theme based on current season
+    switch (currentSeason) {
       case "Advent":
         setLiturgicalTheme("advent")
         break
@@ -59,18 +64,29 @@ export function LiturgicalThemeProvider({ children }: { children: React.ReactNod
         setLiturgicalTheme("default")
         break
     }
-  }, [theme])
+  }, [currentSeason])
+
+  const toggleLiturgicalTheme = () => {
+    const newValue = !isLiturgicalThemeEnabled
+    setIsLiturgicalThemeEnabled(newValue)
+    localStorage.setItem("liturgical-theme-enabled", newValue.toString())
+  }
 
   return (
-    <LiturgicalThemeContext.Provider value={{ liturgicalTheme, setLiturgicalTheme }}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
-        {children}
-      </ThemeProvider>
+    <LiturgicalThemeContext.Provider value={{
+      isLiturgicalThemeEnabled,
+      toggleLiturgicalTheme,
+      currentLiturgicalColor,
+      currentSeason,
+      liturgicalTheme,
+      setLiturgicalTheme
+    }}>
+      {children}
     </LiturgicalThemeContext.Provider>
   )
 }
 
-export const useLiturgicalTheme = (): LiturgicalThemeContextProps => {
+export const useLiturgicalTheme = (): LiturgicalThemeContextType => {
   const context = useContext(LiturgicalThemeContext)
   if (!context) {
     throw new Error("useLiturgicalTheme must be used within a LiturgicalThemeProvider")

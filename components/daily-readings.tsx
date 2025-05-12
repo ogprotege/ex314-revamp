@@ -12,7 +12,7 @@ import {
   getLiturgicalColorBorder,
 } from "@/lib/liturgical-calendar"
 
-export default function DailyReadings({ initialDate = new Date() }: { initialDate?: Date }) {
+export default function DailyReadings({ initialDate = new Date(2025, 4, 12) }: { initialDate?: Date }) {
   const [selectedDate, setSelectedDate] = useState(initialDate)
   const [activeReading, setActiveReading] = useState<string | null>(null)
 

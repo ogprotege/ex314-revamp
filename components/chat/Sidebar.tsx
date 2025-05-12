@@ -5,6 +5,7 @@ import { PlusIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { SidebarSection } from "./SidebarSection"
 import { UserProfile } from "./UserProfile"
 import { useChat } from "@/context/ChatContext"
+import Image from "next/image"
 
 interface SidebarProps {
   isCollapsed: boolean
@@ -29,13 +30,13 @@ export const Sidebar = ({ isCollapsed, onToggle, onLogout }: SidebarProps) => {
         {!isCollapsed ? (
           <>
             <div className="w-7 h-7 bg-accent-purple rounded flex items-center justify-center shadow-sm">
-              <img src="/jerusalem-cross.png" alt="Jerusalem Cross" className="w-5 h-5" />
+              <Image src="/jerusalem-cross.png" alt="Jerusalem Cross" width={20} height={20} />
             </div>
             <span className="text-base font-semibold text-white">AI Assistant</span>
           </>
         ) : (
           <div className="w-7 h-7 bg-accent-purple rounded flex items-center justify-center shadow-sm mx-auto">
-            <img src="/chi-ro.png" alt="Chi-Rho" className="w-5 h-5" />
+            <Image src="/chi-ro.png" alt="Chi-Rho" width={20} height={20} />
           </div>
         )}
         <button

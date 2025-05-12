@@ -61,34 +61,44 @@ export function Turnstile({
     setIsTestMode(shouldUseTestMode || useFallback)
   }, [shouldUseTestMode, useFallback])
 
-  // If in test mode, provide a fallback
-  if (isTestMode) {
-    return (
-      <div className={`p-4 border rounded ${className}`}>
-        <p className="text-sm text-gray-600 mb-2">Security check (development mode)</p>
-        <button
-          onClick={() => onVerify("test_verification_token")}
-          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
-        >
-          Verify (Test Mode)
-        </button>
-      </div>
-    )
-  }
+  // We'll handle the test mode render in the final return
 
   useEffect(() => {
     const currentWidgetId: string | null = null
 
+    // Early return if site key is missing
     if (!turnstileSiteKey) {
       console.error("Turnstile site key is missing. Please set NEXT_PUBLIC_TURNSTILE_SITE_KEY environment variable.")
       setUseFallback(true)
       return () => {} // Return an empty cleanup function
     }
 
+    // Create renderWidget function as a dependency for this effect
+    const renderWidgetInEffect = () => {
+      if (!containerRef.current || !window.turnstile || !turnstileSiteKey) return
+      try {
+        const id = window.turnstile.render(containerRef.current, {
+          sitekey: turnstileSiteKey,
+          theme,
+          size,
+          callback: onVerify,
+          "expired-callback": onExpire,
+          "error-callback": () => {
+            if (onError) onError()
+            setUseFallback(true)
+          },
+        })
+        setWidgetId(id)
+      } catch (error) {
+        console.error("Error rendering Turnstile:", error)
+        setUseFallback(true)
+      }
+    }
+
     // Skip if script is already loaded
     if (document.querySelector('script[src*="turnstile/v0/api.js"]')) {
       if (window.turnstile && containerRef.current && !widgetId) {
-        renderWidget()
+        renderWidgetInEffect()
       }
       return () => {} // Return an empty cleanup function
     }
@@ -96,7 +106,7 @@ export function Turnstile({
     // Define the callback function that will be called when the script loads
     window.onloadTurnstileCallback = () => {
       if (containerRef.current && !widgetId) {
-        renderWidget()
+        renderWidgetInEffect()
       }
     }
 
@@ -114,27 +124,19 @@ export function Turnstile({
     }
   }, [turnstileSiteKey, theme, size, onVerify, onExpire, onError, widgetId])
 
-  // Function to render the widget
-  const renderWidget = () => {
-    if (!containerRef.current || !window.turnstile || !turnstileSiteKey) return
-
-    try {
-      const id = window.turnstile.render(containerRef.current, {
-        sitekey: turnstileSiteKey,
-        theme,
-        size,
-        callback: onVerify,
-        "expired-callback": onExpire,
-        "error-callback": () => {
-          if (onError) onError()
-          setUseFallback(true)
-        },
-      })
-      setWidgetId(id)
-    } catch (error) {
-      console.error("Error rendering Turnstile:", error)
-      setUseFallback(true)
-    }
+  // If in test mode, provide a fallback
+  if (isTestMode) {
+    return (
+      <div className={`p-4 border rounded ${className}`}>
+        <p className="text-sm text-gray-600 mb-2">Security check (development mode)</p>
+        <button
+          onClick={() => onVerify("test_verification_token")}
+          className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+        >
+          Verify (Test Mode)
+        </button>
+      </div>
+    )
   }
 
   return <div ref={containerRef} className={className} />

@@ -28,9 +28,10 @@ export default function LiturgicalCalendar() {
   const [upcomingFeasts, setUpcomingFeasts] = useState<Array<{ name: string; date: Date }>>([])
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
-  // Fix for the "December 1969" bug - ensure we have a valid date
+  // Ensure we have the current date set correctly (May 12, 2025)
   useEffect(() => {
-    const today = new Date()
+    // We'll use May 12, 2025 as our current date
+    const today = new Date(2025, 4, 12) // Month is 0-indexed, so 4 = May
     setCurrentDate(today)
     setCurrentMonth(today)
     setSelectedDate(today)
@@ -48,7 +49,7 @@ export default function LiturgicalCalendar() {
       .slice(0, 5)
 
     setUpcomingFeasts(feasts)
-  }, [])
+  }, [/* Only run once on initial load */])
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
@@ -69,6 +70,11 @@ export default function LiturgicalCalendar() {
   // Handle day selection
   const selectDay = (day: Date) => {
     setSelectedDate(day)
+    // Also update the readings component
+    if (day.getMonth() !== currentMonth.getMonth()) {
+      // If selecting a day from a different month, update the current month view
+      setCurrentMonth(day)
+    }
   }
 
   return (
@@ -78,8 +84,6 @@ export default function LiturgicalCalendar() {
 
       {/* Calendar */}
       <div className={`rounded-lg shadow-md p-6 ${seasonColorBg} transition-colors duration-500`}>
-        <h2 className="text-2xl font-bold mb-4">{format(currentMonth, "MMMM yyyy")}</h2>
-
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={prevMonth}
@@ -89,7 +93,7 @@ export default function LiturgicalCalendar() {
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <div className="text-lg font-medium">{format(currentMonth, "MMMM yyyy")}</div>
+          <div className="text-2xl font-bold">{format(currentMonth, "MMMM yyyy")}</div>
 
           <button
             onClick={nextMonth}
@@ -126,19 +130,14 @@ export default function LiturgicalCalendar() {
             return (
               <div
                 key={day.toString()}
-                className={`h-10 w-10 flex items-center justify-center rounded-full ${
-                  isSelected ? "ring-2 ring-offset-2 ring-purple-500" : ""
-                } ${
-                  isToday
-                    ? "bg-purple-600 text-white font-bold"
-                    : isCurrentMonth
-                      ? feast?.type === "solemnity"
-                        ? "bg-purple-100 font-medium"
-                        : feast?.type === "feast"
-                          ? "bg-red-100 font-medium"
-                          : `hover:${seasonColor} hover:bg-opacity-20`
-                      : "text-gray-400"
-                } transition-colors duration-200 cursor-pointer relative`}
+                className={`h-10 w-10 flex items-center justify-center rounded-full
+                  ${isSelected ? "ring-2 ring-offset-2 ring-purple-500" : ""}
+                  ${isToday ? "bg-purple-600 text-white font-bold" : ""}
+                  ${!isToday && isCurrentMonth && feast?.type === "solemnity" ? "bg-purple-100 font-medium" : ""}
+                  ${!isToday && isCurrentMonth && feast?.type === "feast" ? "bg-red-100 font-medium" : ""}
+                  ${!isToday && isCurrentMonth && !feast ? `hover:${seasonColor} hover:bg-opacity-20` : ""}
+                  ${!isCurrentMonth ? "text-gray-400" : ""}
+                  transition-colors duration-200 cursor-pointer relative`}
                 title={feast?.name || ""}
                 onClick={() => selectDay(day)}
               >

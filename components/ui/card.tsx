@@ -76,4 +76,21 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+// Interactive card with hover effects
+const InteractiveCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { interactive?: boolean }
+>(({ className, interactive = true, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      interactive && "transition-all duration-200 hover:shadow-md hover:border-primary/50 cursor-pointer",
+      className
+    )}
+    {...props}
+  />
+))
+InteractiveCard.displayName = "InteractiveCard"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, InteractiveCard }

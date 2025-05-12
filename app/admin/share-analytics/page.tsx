@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -20,9 +20,9 @@ export default function ShareAnalyticsDashboard() {
 
   useEffect(() => {
     fetchShareAnalytics()
-  }, [timeframe, activeTab])
+  }, [timeframe, activeTab, fetchShareAnalytics])
 
-  const fetchShareAnalytics = async () => {
+  const fetchShareAnalytics = useCallback(async () => {
     try {
       setLoading(true)
       const includeConversationData = activeTab === "conversations" || activeTab === "training"
@@ -39,7 +39,7 @@ export default function ShareAnalyticsDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [timeframe, activeTab])
 
   const handleExportData = async () => {
     try {

@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js"
 import { headers } from "next/headers"
 import { cookies } from "next/headers"
 import { auth } from "@clerk/nextjs/server"
-import UAParser from "ua-parser-js"
+import { UAParser } from "ua-parser-js"
 
 // Initialize Supabase client with service role key for server operations
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import { adminMiddleware } from "./middleware/admin"
 
 // This function handles your Content Security Policy headers
 function addSecurityHeaders(request: NextRequest, response: NextResponse) {
@@ -47,10 +48,21 @@ const isPublicRoute = createRouteMatcher([
   "/api/public-route(.*)",
 ])
 
-export default function middleware(req: NextRequest) {
+// Define admin routes
+const isAdminRoute = createRouteMatcher([
+  "/admin(.*)",
+  "/api/admin(.*)",
+])
+
+export default async function middleware(req: NextRequest) {
   // Apply security headers to all responses
   const response = NextResponse.next()
   const secureResponse = addSecurityHeaders(req, response)
+
+  // Check if this is an admin route
+  if (isAdminRoute(req)) {
+    return await adminMiddleware(req);
+  }
 
   // For Clerk authentication, use their middleware
   return clerkMiddleware()(req, secureResponse)

@@ -3,6 +3,7 @@ import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from 'next/font/google'
 import { ClerkProvider } from "@clerk/nextjs"
+import Link from "next/link"
 import { PrivateAnalytics } from "@/components/analytics/private-analytics"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -58,25 +59,25 @@ export default function RootLayout({
                 <header className="border-b bg-background sticky top-0 z-50">
                   <div className="container flex h-16 items-center justify-between px-4">
                     <div className="flex items-center gap-2">
-                      <a href="/" className="flex items-center space-x-2">
+                      <Link href="/" className="flex items-center space-x-2">
                         <span className="font-semibold">Ex314.ai</span>
-                      </a>
+                      </Link>
                       <nav className="hidden md:flex items-center gap-6 text-sm">
-                        <a href="/prayers" className="transition-colors hover:text-primary">
+                        <Link href="/prayers" className="transition-colors hover:text-primary">
                           Prayers
-                        </a>
-                        <a href="/calendar" className="transition-colors hover:text-primary">
+                        </Link>
+                        <Link href="/calendar" className="transition-colors hover:text-primary">
                           Calendar
-                        </a>
-                        <a href="/rosary" className="transition-colors hover:text-primary">
+                        </Link>
+                        <Link href="/rosary" className="transition-colors hover:text-primary">
                           Rosary
-                        </a>
-                        <a href="/about" className="transition-colors hover:text-primary">
+                        </Link>
+                        <Link href="/about" className="transition-colors hover:text-primary">
                           About
-                        </a>
-                        <a href="/dashboard" className="transition-colors hover:text-primary">
+                        </Link>
+                        <Link href="/dashboard" className="transition-colors hover:text-primary">
                           Dashboard
-                        </a>
+                        </Link>
                       </nav>
                     </div>
                     <AuthButtons />

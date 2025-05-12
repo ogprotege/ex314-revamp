@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getSaint } from "@/lib/saints-data"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowLeft, Quote, BookOpen, Bookmark } from "lucide-react"
 
 type SaintPageProps = {
@@ -72,11 +73,15 @@ export default async function SaintPage({ params }: SaintPageProps) {
         <div className="flex flex-col lg:flex-row gap-6 mb-8">
           <div className="flex-shrink-0 flex items-start justify-center">
             {saint.imageUrl ? (
-              <img 
-                src={saint.imageUrl} 
-                alt={saint.name} 
-                className="rounded-lg shadow-md w-full max-w-[300px] h-auto object-cover" 
-              />
+              <div className="relative rounded-lg shadow-md w-full max-w-[300px] h-[400px]">
+                <Image
+                  src={saint.imageUrl}
+                  alt={saint.name}
+                  fill
+                  sizes="300px"
+                  className="object-cover rounded-lg"
+                />
+              </div>
             ) : (
               <div className="bg-gray-100 rounded-lg flex items-center justify-center w-[300px] h-[300px]">
                 <ChiRho className="h-32 w-32 text-gray-400" />

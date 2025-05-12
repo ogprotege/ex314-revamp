@@ -67,15 +67,7 @@ export function generateShareUrl(
 export function createContextualShareButton(platform: string, conversationContext?: any, contentInfo?: any) {
   const shareUrl = generateShareUrl("https://ex314.ai", conversationContext, contentInfo)
 
-  return (
-    <a
-      href={shareUrl}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <span>Share on {platform}</span>
-    </a>
-  )
+  // Return the URL for this utility function. UI components should be in a tsx file
+  return shareUrl
 }
 

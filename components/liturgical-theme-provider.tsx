@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { getCurrentSeason } from "@/lib/liturgical-calendar"
+import { getCurrentLiturgicalSeason } from "@/lib/liturgical-calendar"
 
 type LiturgicalThemeContextType = {
   isLiturgicalThemeEnabled: boolean
@@ -34,7 +34,7 @@ export function LiturgicalThemeProvider({ children }: { children: React.ReactNod
 
     // Get current liturgical season and color
     const today = new Date(2025, 4, 9) // May 9, 2025
-    const season = getCurrentSeason(today)
+    const season = getCurrentLiturgicalSeason(today)
     setCurrentLiturgicalColor(season.color.toLowerCase())
     setCurrentSeason(season.name)
   }, [])

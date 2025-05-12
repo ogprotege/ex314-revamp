@@ -4,13 +4,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 
 export default function EnvironmentDiagnosticsPage() {
-  // Auth0 Environment Variables
-  const auth0Variables = [
-    { name: "AUTH0_DOMAIN", value: process.env.AUTH0_DOMAIN, sensitive: false },
-    { name: "AUTH0_CLIENT_ID", value: process.env.AUTH0_CLIENT_ID, sensitive: false },
-    { name: "AUTH0_REDIRECT_URI", value: process.env.AUTH0_REDIRECT_URI, sensitive: false },
-    { name: "AUTH0_AUDIENCE", value: process.env.AUTH0_AUDIENCE, sensitive: false },
-    { name: "AUTH0_NAMESPACE", value: process.env.AUTH0_NAMESPACE, sensitive: false },
+  // Clerk Auth Environment Variables
+  const clerkVariables = [
+    { name: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", value: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY, sensitive: false },
+    { name: "CLERK_SECRET_KEY", value: process.env.CLERK_SECRET_KEY, sensitive: true },
+    { name: "NEXT_PUBLIC_CLERK_SIGN_IN_URL", value: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL, sensitive: false },
+    { name: "NEXT_PUBLIC_CLERK_SIGN_UP_URL", value: process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL, sensitive: false },
+    { name: "NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL", value: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL, sensitive: false },
+    { name: "NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL", value: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL, sensitive: false },
   ]
 
   // Supabase Environment Variables
@@ -118,11 +119,11 @@ export default function EnvironmentDiagnosticsPage() {
           </CardContent>
         </Card>
 
-        {/* Auth0 Variables */}
+        {/* Clerk Variables */}
         <Card>
           <CardHeader>
-            <CardTitle>Auth0 Configuration</CardTitle>
-            <CardDescription>Environment variables for Auth0 authentication</CardDescription>
+            <CardTitle>Clerk Configuration</CardTitle>
+            <CardDescription>Environment variables for Clerk authentication</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -135,7 +136,7 @@ export default function EnvironmentDiagnosticsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {auth0Variables.map((variable) => {
+                  {clerkVariables.map((variable) => {
                     const status = getStatus(variable.value)
                     return (
                       <tr key={variable.name} className="hover:bg-gray-50">

@@ -1,50 +1,80 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import { adminMiddleware } from "./middleware/admin"
 
-export async function middleware(request: NextRequest) {
-  // Get the pathname from the URL
-  const { pathname } = request.nextUrl
-
-  // Create a response object to modify
-  const response = NextResponse.next()
-
-  // Base CSP directives
+// This function handles your Content Security Policy headers
+function addSecurityHeaders(request: NextRequest, response: NextResponse) {
   const cspDirectives = [
-    // Default rules - restrict to same origin by default
     "default-src 'self'",
-
-    // Scripts - allow your site and Turnstile
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com",
-
-    // Styles - only from your site and inline styles (needed for shadcn/ui and other libraries)
+    // Scripts: self, inline for UI components, unsafe-eval (consider reducing if possible), Clerk, Google Tag Manager, Cloudflare Turnstile
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.ex314.ai https://www.googletagmanager.com https://challenges.cloudflare.com",
+    // Styles: self, inline for UI components
     "style-src 'self' 'unsafe-inline'",
-
-    // Connections - your site and Turnstile verification
-    "connect-src 'self' https://challenges.cloudflare.com https://*.turnstile.com https://www.google-analytics.com",
-
-    // Frames - your site and Turnstile widget
-    "frame-src 'self' https://challenges.cloudflare.com",
-
-    // Images - your site, data URLs, and Turnstile
-    "img-src 'self' data: blob: https://challenges.cloudflare.com https://images.unsplash.com",
-
-    // Fonts - your site and inline data
+    // Connections: self, Clerk, Google Analytics, Cloudflare Turnstile
+    "connect-src 'self' https://*.clerk.accounts.dev https://clerk.ex314.ai https://www.google-analytics.com https://challenges.cloudflare.com https://*.turnstile.com",
+    // Frames: self, Clerk, Cloudflare Turnstile
+    "frame-src 'self' https://*.clerk.accounts.dev https://clerk.ex314.ai https://challenges.cloudflare.com",
+    // Images: self, data URIs, blobs, Clerk, Unsplash, Cloudflare Turnstile
+    "img-src 'self' data: blob: https://*.clerk.accounts.dev https://clerk.ex314.ai https://images.unsplash.com https://challenges.cloudflare.com",
     "font-src 'self' data:",
-
-    // Navigation
     "navigate-to 'self' https: mailto:",
   ]
 
-  // Set the CSP header (now includes Turnstile domains for all pages)
   response.headers.set("Content-Security-Policy", cspDirectives.join("; "))
+  response.headers.set("X-Content-Type-Options", "nosniff")
+  response.headers.set("X-Frame-Options", "DENY")
+  response.headers.set("X-XSS-Protection", "1; mode=block")
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
 
   return response
 }
 
-// Configure which routes the middleware applies to
+// Define public routes
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/prayers(.*)",
+  "/calendar(.*)",
+  "/rosary(.*)",
+  "/about(.*)",
+  "/resources(.*)",
+  "/contact(.*)",
+  "/privacy(.*)",
+  "/terms(.*)",
+  "/unauthorized(.*)",
+  "/api/public-route(.*)",
+])
+
+// Define admin routes
+const isAdminRoute = createRouteMatcher([
+  "/admin(.*)",
+  "/api/admin(.*)",
+])
+
+export default async function middleware(req: NextRequest) {
+  // Apply security headers to all responses
+  const response = NextResponse.next()
+  const secureResponse = addSecurityHeaders(req, response)
+
+  // Check if this is an admin route
+  if (isAdminRoute(req)) {
+    return await adminMiddleware(req);
+  }
+
+  // For Clerk authentication, use their middleware
+  return clerkMiddleware()(req, secureResponse)
+}
+
 export const config = {
   matcher: [
-    // Apply to all routes
-    "/(.*)",
+    // Skip Next.js internals, static files, and all file extensions.
+    "/((?!_next|[^?]*\\.(?:html?|css|js|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|json|webmanifest|xml|map|txt)).*)",
+    // Always run for API routes to protect them by default
+    "/api/:path*",
+    "/trpc/:path*",
   ],
 }
+

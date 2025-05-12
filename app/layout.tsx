@@ -1,13 +1,16 @@
 import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter } from 'next/font/google'
+import { ClerkProvider } from "@clerk/nextjs"
+import Link from "next/link"
 import { PrivateAnalytics } from "@/components/analytics/private-analytics"
 import { Suspense } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LiturgicalThemeProvider } from "@/components/liturgical-theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import Script from "next/script"
+import { AuthButtons } from "@/components/auth-buttons"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,42 +26,72 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* Google Tag Manager */}
-        <Script id="google-tag-manager" strategy="afterInteractive">
-          {`
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-W8C4F87P');
-          `}
-        </Script>
-        {/* End Google Tag Manager */}
-      </head>
-      <body className={inter.className}>
-        {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-W8C4F87P"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
-        {/* End Google Tag Manager (noscript) */}
+    <ClerkProvider>
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          {/* Google Tag Manager */}
+          <Script id="google-tag-manager" strategy="afterInteractive">
+            {`
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','GTM-W8C4F87P');
+            `}
+          </Script>
+          {/* End Google Tag Manager */}
+        </head>
+        <body className={inter.className}>
+          {/* Google Tag Manager (noscript) */}
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-W8C4F87P"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+          {/* End Google Tag Manager (noscript) */}
 
-        <ThemeProvider defaultTheme="light" storageKey="ex314-theme">
-          <LiturgicalThemeProvider>
-            <Suspense fallback={<div>Loading...</div>}>
-              {children}
-              <PrivateAnalytics />
-              <Toaster />
-            </Suspense>
-          </LiturgicalThemeProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider defaultTheme="light" storageKey="ex314-theme">
+            <LiturgicalThemeProvider>
+              <Suspense fallback={<div>Loading...</div>}>
+                <header className="border-b bg-background sticky top-0 z-50">
+                  <div className="container flex h-16 items-center justify-between px-4">
+                    <div className="flex items-center gap-2">
+                      <Link href="/" className="flex items-center space-x-2">
+                        <span className="font-semibold">Ex314.ai</span>
+                      </Link>
+                      <nav className="hidden md:flex items-center gap-6 text-sm">
+                        <Link href="/prayers" className="transition-colors hover:text-primary">
+                          Prayers
+                        </Link>
+                        <Link href="/calendar" className="transition-colors hover:text-primary">
+                          Calendar
+                        </Link>
+                        <Link href="/rosary" className="transition-colors hover:text-primary">
+                          Rosary
+                        </Link>
+                        <Link href="/about" className="transition-colors hover:text-primary">
+                          About
+                        </Link>
+                        <Link href="/dashboard" className="transition-colors hover:text-primary">
+                          Dashboard
+                        </Link>
+                      </nav>
+                    </div>
+                    <AuthButtons />
+                  </div>
+                </header>
+                {children}
+                <PrivateAnalytics />
+                <Toaster />
+              </Suspense>
+            </LiturgicalThemeProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
+

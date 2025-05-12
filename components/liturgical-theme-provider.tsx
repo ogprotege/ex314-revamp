@@ -2,13 +2,11 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { getCurrentLiturgicalSeason } from "@/lib/liturgical-calendar"
+import { getCurrentSeason } from "@/lib/liturgical-calendar"
 
-type LiturgicalThemeContextType = {
-  isLiturgicalThemeEnabled: boolean
-  toggleLiturgicalTheme: () => void
-  currentLiturgicalColor: string
-  currentSeason: string
+interface LiturgicalThemeContextProps {
+  liturgicalTheme: string
+  setLiturgicalTheme: (theme: string) => void
 }
 
 const LiturgicalThemeContext = createContext<LiturgicalThemeContextType>({
@@ -34,48 +32,49 @@ export function LiturgicalThemeProvider({ children }: { children: React.ReactNod
 
     // Get current liturgical season and color
     const today = new Date(2025, 4, 9) // May 9, 2025
-    const season = getCurrentLiturgicalSeason(today)
+    const season = getCurrentSeason(today)
     setCurrentLiturgicalColor(season.color.toLowerCase())
     setCurrentSeason(season.name)
   }, [])
 
   useEffect(() => {
-    if (!isLiturgicalThemeEnabled) return
-
-    // Apply liturgical colors to the document
-    const root = document.documentElement
-
-    // Remove any existing liturgical color classes
-    root.classList.remove(
-      "liturgical-green",
-      "liturgical-purple",
-      "liturgical-white",
-      "liturgical-red",
-      "liturgical-rose",
-      "liturgical-black",
-    )
-
-    // Add the current liturgical color class
-    root.classList.add(`liturgical-${currentLiturgicalColor.toLowerCase()}`)
-
-    // Store preference
-    localStorage.setItem("liturgical-theme-enabled", String(isLiturgicalThemeEnabled))
-  }, [isLiturgicalThemeEnabled, currentLiturgicalColor])
-
-  const toggleLiturgicalTheme = () => {
-    setIsLiturgicalThemeEnabled((prev) => !prev)
-  }
+    const season = getCurrentLiturgicalSeason()
+    switch (season) {
+      case "Advent":
+        setLiturgicalTheme("advent")
+        break
+      case "Christmas":
+        setLiturgicalTheme("christmas")
+        break
+      case "Ordinary Time":
+        setLiturgicalTheme("ordinaryTime")
+        break
+      case "Lent":
+        setLiturgicalTheme("lent")
+        break
+      case "Easter":
+        setLiturgicalTheme("easter")
+        break
+      default:
+        setLiturgicalTheme("default")
+        break
+    }
+  }, [theme])
 
   return (
-    <LiturgicalThemeContext.Provider
-      value={{
-        isLiturgicalThemeEnabled,
-        toggleLiturgicalTheme,
-        currentLiturgicalColor,
-        currentSeason,
-      }}
-    >
-      {children}
+    <LiturgicalThemeContext.Provider value={{ liturgicalTheme, setLiturgicalTheme }}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem={true}>
+        {children}
+      </ThemeProvider>
     </LiturgicalThemeContext.Provider>
   )
 }
+
+export const useLiturgicalTheme = (): LiturgicalThemeContextProps => {
+  const context = useContext(LiturgicalThemeContext)
+  if (!context) {
+    throw new Error("useLiturgicalTheme must be used within a LiturgicalThemeProvider")
+  }
+  return context
+}
+

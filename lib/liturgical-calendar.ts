@@ -269,3 +269,4 @@ export function getLiturgicalColorBg(color: string): string {
       return "bg-gray-50"
   }
 }
+

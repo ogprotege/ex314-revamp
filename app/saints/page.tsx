@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { getAllSaints } from "@/lib/saints-data"
 import Link from "next/link"
 import { ChiRho } from "@/components/chi-rho"
+import Image from "next/image"
 
 export const metadata: Metadata = {
   title: "Saints Directory - Ex314.ai",
@@ -53,11 +54,15 @@ export default async function SaintsDirectoryPage() {
               <div className="border border-gray-200 rounded-lg overflow-hidden transition-shadow hover:shadow-md">
                 <div className="aspect-w-16 aspect-h-9 bg-gray-100 flex items-center justify-center">
                   {saint.imageUrl ? (
-                    <img 
-                      src={saint.imageUrl} 
-                      alt={saint.name} 
-                      className="object-cover h-full w-full" 
-                    />
+                    <div className="relative h-full w-full">
+                      <Image
+                        src={saint.imageUrl}
+                        alt={saint.name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center h-full">
                       <span className="text-5xl font-bold text-gray-300">{saint.name[0]}</span>

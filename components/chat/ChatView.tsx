@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import type { Message } from "@/lib/types"
 import { ChatMessage } from "./ChatMessage"
 import { ChatInput } from "./ChatInput"
@@ -67,10 +67,10 @@ export function ChatView({ messages, isLoading, onSendMessage }: ChatViewProps) 
     if (isSearchOpen && searchTerm) {
       performSearch(searchTerm, filtered)
     }
-  }, [filter, messages])
+  }, [filter, messages, isSearchOpen, searchTerm, performSearch])
 
   // Perform search on filtered messages
-  const performSearch = (term: string, messagesToSearch = filteredMessages) => {
+  const performSearch = useCallback((term: string, messagesToSearch = filteredMessages) => {
     if (!term.trim()) {
       setSearchResults([])
       setCurrentResultIndex(0)
@@ -100,6 +100,7 @@ export function ChatView({ messages, isLoading, onSendMessage }: ChatViewProps) 
     // Scroll to first result
     setTimeout(() => {
       if (results.length > 0) {
+  }, [filteredMessages])
         scrollToResult(0)
       }
     }, 100)
